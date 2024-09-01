@@ -1,12 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"sync"
 	"time"
 
 	"github.com/WatchJani/pool"
-	s "github.com/WatchJani/stack"
+	st "github.com/WatchJani/stack"
 )
 
 func main() {
@@ -14,6 +15,7 @@ func main() {
 	s := []int{135, 135, 119, 42, 134, 41, 145, 110, 44, 4}
 
 	for _, value := range s {
+		fmt.Println(value)
 		sl.Insert(value, 23)
 	}
 }
@@ -21,18 +23,19 @@ func main() {
 type SkipList struct {
 	roots     []*Node
 	rootIndex int
-	s.Stack[s.Stack[*Node]]
+	st.Stack[st.Stack[*Node]]
 	pool.Pool[Node]
 	sync.RWMutex
 	percentage float64
+	height     int
 }
 
 func New(height, capacity int, percentage float64) *SkipList {
 	//fix this part to be dynamic
-	stack := s.New[s.Stack[*Node]](250)
+	stack := st.New[st.Stack[*Node]](250)
 
 	for range 250 {
-		stack.Push(s.New[*Node](height))
+		stack.Push(st.New[*Node](height))
 	}
 
 	roots := make([]*Node, height)
@@ -45,6 +48,7 @@ func New(height, capacity int, percentage float64) *SkipList {
 		Stack:      stack,
 		Pool:       pool.New[Node](capacity),
 		percentage: percentage,
+		height:     height,
 	}
 }
 
@@ -72,7 +76,7 @@ func (s *SkipList) Insert(key, value int) {
 	current, startIndex := s.roots[s.rootIndex], s.rootIndex
 	stack, err := s.Stack.Pop()
 	if err != nil {
-		//Create new stack
+		stack = st.New[*Node](s.height)
 	}
 
 	for {
