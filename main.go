@@ -11,8 +11,11 @@ import (
 
 func main() {
 	sl := New(8, 250, 0.25)
+	s := []int{135, 135, 119, 42, 134, 41, 145, 110, 44, 4}
 
-	sl.Insert(5, 23)
+	for _, value := range s {
+		sl.Insert(value, 23)
+	}
 }
 
 type SkipList struct {
@@ -66,7 +69,7 @@ func NewNode(next, down *Node, value, key int, leaf bool) Node {
 }
 
 func (s *SkipList) Insert(key, value int) {
-	current := s.roots[s.rootIndex]
+	current, startIndex := s.roots[s.rootIndex], s.rootIndex
 	stack, err := s.Stack.Pop()
 	if err != nil {
 		//Create new stack
@@ -79,7 +82,7 @@ func (s *SkipList) Insert(key, value int) {
 			s.RUnlock()
 		}
 
-		if current.leaf || s.rootIndex == 0 {
+		if current.leaf || startIndex == 0 {
 			break
 		}
 
@@ -88,26 +91,33 @@ func (s *SkipList) Insert(key, value int) {
 		s.RLock()
 		current = current.down
 		s.RUnlock()
+		startIndex--
 	}
 
+	s.Lock()
 	rightSide := current.next
 
 	node := s.Pool.Insert()
 	current.next = node
-	*node = NewNode(rightSide, nil, value, key, true) // create new node
+	*node = NewNode(rightSide, nil, value, key, true) // create new leaf node
+	s.Unlock()
 
 	for FlipCoin(s.percentage) {
 		temp := node
 		leftNode, err := stack.Pop()
 		if err != nil {
 			//new big height
+			s.rootIndex++
+			leftNode = s.roots[s.rootIndex]
 		}
 
+		s.Lock()
 		rightSide = leftNode.next
 		node = s.Pool.Insert()
-		leftNode.next = rightSide
+		leftNode.next = node
 
-		*node = NewNode(rightSide, temp, key, value, false)
+		*node = NewNode(rightSide, temp, key, value, false) // create new internal node
+		s.Unlock()
 	}
 }
 
