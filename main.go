@@ -11,24 +11,19 @@ import (
 )
 
 func main() {
-	sl := New(32, 25000, 0.5)
-	s := []int{136, 135, 119, 42, 134, 41, 145, 110, 44, 4}
+	sl := New(32, 2500, 0.5)
+	s := []int{136, 137, 119, 42, 134, 41, 145, 110, 44, 4}
 
-	for {
-		for _, value := range s[:1] {
-			fmt.Println("=>", value)
-			id := sl.Insert(value, 23)
+	for _, value := range s {
+		fmt.Println(value)
+		sl.Insert(value, 23)
 
-			fmt.Println(id)
-
-			for index := id; index > -1; index-- {
-				fmt.Println(sl.roots[id].next.key)
-			}
-
-			sl.Read()
-			fmt.Println("new index", sl.rootIndex)
-		}
+		// for i := sl.rootIndex; i >= 0; i-- {
+		// 	fmt.Println(sl.roots[i].next)
+		// }
 	}
+
+	sl.Read()
 }
 
 type SkipList struct {
@@ -50,9 +45,11 @@ func New(height, capacity int, percentage float64) *SkipList {
 	}
 
 	roots := make([]*Node, height)
-	for index := range roots {
+	for index := 1; index < len(roots); index++ {
 		roots[index] = &Node{}
 	}
+
+	roots[0] = &Node{leaf: true}
 
 	return &SkipList{
 		roots:      roots,
@@ -83,10 +80,9 @@ func NewNode(next, down *Node, value, key int, leaf bool) Node {
 	}
 }
 
-func (s *SkipList) Insert(key, value int) int {
-	current, startIndex := s.roots[s.rootIndex], s.rootIndex
+func (s *SkipList) Insert(key, value int) {
+	current := s.roots[s.rootIndex]
 	stack, err := s.Stack.Pop()
-
 	if err != nil {
 		stack = st.New[*Node](s.height)
 	}
@@ -96,45 +92,38 @@ func (s *SkipList) Insert(key, value int) int {
 			current = current.next
 		}
 
-		if current.leaf || startIndex == 0 {
+		if current.leaf {
 			break
 		}
 
 		stack.Push(current)
-
 		current = current.down
-
-		startIndex--
 	}
-	next := current.next
+
+	nextNode := current.next
 
 	node := s.Pool.Insert()
 	current.next = node
-	*node = NewNode(next, nil, value, key, true) // create new leaf node
+	*node = NewNode(nextNode, nil, value, key, true) // create new leaf node
 
-	var counter int
-	for flipCoin(s.percentage) && s.height > startIndex {
-		downNode := node
-		leftNode, err := stack.Pop()
+	// for flipCoin(s.percentage) && s.height > s.rootIndex {
+	// 	downNode := node
+	// 	leftNode, err := stack.Pop()
 
-		if err != nil {
-			s.rootIndex++
-			leftNode = s.roots[s.rootIndex]
-		}
+	// 	if err != nil {
+	// 		s.rootIndex++
+	// 		leftNode = s.roots[s.rootIndex]
+	// 	}
 
-		counter++
+	// 	nextNode = leftNode.next
+	// 	node = s.Pool.Insert()
+	// 	leftNode.next = node
 
-		next = leftNode.next
-		node = s.Pool.Insert()
-		leftNode.next = node
-
-		*node = NewNode(next, downNode, value, key, false) // create new internal node
-	}
+	// 	*node = NewNode(nextNode, downNode, value, key, false) // create new internal node
+	// }
 
 	stack.Clear()       //Clear stack
 	s.Stack.Push(stack) // return to stack stack
-
-	return counter
 }
 
 func flipCoin(percentage float64) bool {
