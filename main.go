@@ -14,8 +14,8 @@ func main() {
 	sl := New(8, 250, 0.5)
 	s := []int{136, 135, 119, 42, 134, 41, 145, 110, 44, 4}
 
-	for _, value := range s {
-		fmt.Println(value)
+	for _, value := range s[:2] {
+		fmt.Println("=>", value)
 		sl.Insert(value, 23)
 		sl.Read()
 	}
@@ -96,12 +96,9 @@ func (s *SkipList) Insert(key, value int) {
 
 		// s.RLock()
 		current = current.down
-		// s.RUnlock()
 		startIndex--
+		// s.RUnlock()
 	}
-
-	// fmt.Println("key", key)
-	// fmt.Println("current key", current.key)
 
 	// s.Lock()
 	next := current.next
@@ -111,15 +108,15 @@ func (s *SkipList) Insert(key, value int) {
 	*node = NewNode(next, nil, value, key, true) // create new leaf node
 	// s.Unlock()
 
+	var counter int
 	for flipCoin(s.percentage) {
-		temp := node
+		downNode := node
 		leftNode, err := stack.Pop()
 
 		if err != nil {
 			//new big height
 			s.rootIndex++
 			leftNode = s.roots[s.rootIndex]
-
 		}
 
 		// s.Lock()
@@ -127,9 +124,17 @@ func (s *SkipList) Insert(key, value int) {
 		node = s.Pool.Insert()
 		leftNode.next = node
 
-		*node = NewNode(next, temp, value, key, false) // create new internal node
+		*node = NewNode(next, downNode, value, key, false) // create new internal node
+
 		// s.Unlock()
 	}
+
+	for start := s.roots[s.rootIndex].next; start != nil; start = start.down {
+		fmt.Println("start", start.key)
+	}
+
+	counter++
+	fmt.Println("counter", counter)
 
 	stack.Clear()       //Clear stack
 	s.Stack.Push(stack) // return to stack stack
