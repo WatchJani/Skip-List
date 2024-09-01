@@ -11,13 +11,15 @@ import (
 )
 
 func main() {
-	sl := New(8, 250, 0.25)
-	s := []int{135, 135, 119, 42, 134, 41, 145, 110, 44, 4}
+	sl := New(8, 250, 0.5)
+	s := []int{136, 135, 119, 42, 134, 41, 145, 110, 44, 4}
 
 	for _, value := range s {
 		fmt.Println(value)
 		sl.Insert(value, 23)
+		sl.Read()
 	}
+
 }
 
 type SkipList struct {
@@ -81,9 +83,9 @@ func (s *SkipList) Insert(key, value int) {
 
 	for {
 		for current.next != nil && current.next.key < key {
-			s.RLock()
+			// s.RLock()
 			current = current.next
-			s.RUnlock()
+			// s.RUnlock()
 		}
 
 		if current.leaf || startIndex == 0 {
@@ -92,39 +94,53 @@ func (s *SkipList) Insert(key, value int) {
 
 		stack.Push(current)
 
-		s.RLock()
+		// s.RLock()
 		current = current.down
-		s.RUnlock()
+		// s.RUnlock()
 		startIndex--
 	}
 
-	s.Lock()
-	rightSide := current.next
+	// fmt.Println("key", key)
+	// fmt.Println("current key", current.key)
+
+	// s.Lock()
+	next := current.next
 
 	node := s.Pool.Insert()
 	current.next = node
-	*node = NewNode(rightSide, nil, value, key, true) // create new leaf node
-	s.Unlock()
+	*node = NewNode(next, nil, value, key, true) // create new leaf node
+	// s.Unlock()
 
-	for FlipCoin(s.percentage) {
+	for flipCoin(s.percentage) {
 		temp := node
 		leftNode, err := stack.Pop()
+
 		if err != nil {
 			//new big height
 			s.rootIndex++
 			leftNode = s.roots[s.rootIndex]
+
 		}
 
-		s.Lock()
-		rightSide = leftNode.next
+		// s.Lock()
+		next = leftNode.next
 		node = s.Pool.Insert()
 		leftNode.next = node
 
-		*node = NewNode(rightSide, temp, key, value, false) // create new internal node
-		s.Unlock()
+		*node = NewNode(next, temp, value, key, false) // create new internal node
+		// s.Unlock()
 	}
+
+	stack.Clear()       //Clear stack
+	s.Stack.Push(stack) // return to stack stack
 }
 
-func FlipCoin(percentage float64) bool {
+func flipCoin(percentage float64) bool {
 	return rand.Float64() < percentage
+}
+
+func (s *SkipList) Read() {
+	for startNode := s.roots[0].next; startNode.next != nil; startNode = startNode.next {
+		fmt.Println(startNode)
+	}
 }
