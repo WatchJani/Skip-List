@@ -134,12 +134,6 @@ func flipCoin(percentage float64) bool {
 	return rand.Float64() < percentage
 }
 
-func (s *SkipList) Read() {
-	for startNode := s.roots[0].next; startNode != nil; startNode = startNode.next {
-		fmt.Println(startNode)
-	}
-}
-
 func (s *SkipList) Search(key int) int {
 	s.Lock()
 	defer s.Unlock()
@@ -159,4 +153,10 @@ func (s *SkipList) Search(key int) int {
 	}
 
 	return current.value
+}
+
+func (s *SkipList) Read() {
+	for startNode := s.roots[0].next; startNode != nil; startNode = startNode.next {
+		fmt.Println(startNode)
+	}
 }
