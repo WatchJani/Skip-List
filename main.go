@@ -15,7 +15,7 @@ func main() {
 	// s := []int{136, 137, 119, 42, 134, 41, 145, 110, 44, 4}
 
 	for index := range 12315 {
-		sl.Insert(index, index)
+		go sl.Insert(index, index)
 	}
 
 	fmt.Println(sl.Search(152))
@@ -35,7 +35,7 @@ type SkipList struct {
 
 func New(height, capacity int, percentage float64) *SkipList {
 	//fix this part to be dynamic
-	stack := st.New[st.Stack[*Node]](250)
+	stack := st.New[st.Stack[*Node]](250) // max number of parallel readings 250
 
 	for range 250 {
 		stack.Push(st.New[*Node](height))
@@ -80,7 +80,11 @@ func NewNode(next, down *Node, value, key int, leaf bool) Node {
 }
 
 func (s *SkipList) Insert(key, value int) {
+	s.Lock()
+	defer s.Unlock()
+
 	current := s.roots[s.rootIndex]
+
 	stack, err := s.Stack.Pop()
 	if err != nil {
 		stack = st.New[*Node](s.height)
@@ -102,6 +106,7 @@ func (s *SkipList) Insert(key, value int) {
 	nextNode := current.next
 
 	node := s.Pool.Insert()
+
 	current.next = node
 	*node = NewNode(nextNode, nil, value, key, true) // create new leaf node
 
@@ -115,9 +120,9 @@ func (s *SkipList) Insert(key, value int) {
 		}
 
 		nextNode = leftNode.next
+
 		node = s.Pool.Insert()
 		leftNode.next = node
-
 		*node = NewNode(nextNode, downNode, value, key, false) // create new internal node
 	}
 
@@ -136,6 +141,9 @@ func (s *SkipList) Read() {
 }
 
 func (s *SkipList) Search(key int) int {
+	s.Lock()
+	defer s.Unlock()
+
 	current := s.roots[s.rootIndex]
 
 	for {

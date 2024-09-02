@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-// 150ns
+// 156ns //single thread
 func BenchmarkInsert(b *testing.B) {
 	b.StopTimer()
 
@@ -14,6 +14,8 @@ func BenchmarkInsert(b *testing.B) {
 		sl.Insert(i, i)
 	}
 }
+
+//180ns for multi core
 
 // 30ns search
 func BenchmarkSearch(b *testing.B) {
