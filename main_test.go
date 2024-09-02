@@ -14,3 +14,20 @@ func BenchmarkInsert(b *testing.B) {
 		sl.Insert(i, i)
 	}
 }
+
+// 30ns search
+func BenchmarkSearch(b *testing.B) {
+	b.StopTimer()
+
+	sl := New(32, 12315*2, 0.25)
+
+	for index := range 12315 {
+		sl.Insert(index, index)
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		sl.Search(152)
+	}
+}

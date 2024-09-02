@@ -15,8 +15,10 @@ func main() {
 	// s := []int{136, 137, 119, 42, 134, 41, 145, 110, 44, 4}
 
 	for index := range 12315 {
-		sl.Insert(index, 23)
+		sl.Insert(index, index)
 	}
+
+	fmt.Println(sl.Search(152))
 
 	// sl.Read()
 }
@@ -131,4 +133,22 @@ func (s *SkipList) Read() {
 	for startNode := s.roots[0].next; startNode != nil; startNode = startNode.next {
 		fmt.Println(startNode)
 	}
+}
+
+func (s *SkipList) Search(key int) int {
+	current := s.roots[s.rootIndex]
+
+	for {
+		for current.next != nil && current.next.key <= key {
+			current = current.next
+		}
+
+		if current.leaf {
+			break
+		}
+
+		current = current.down
+	}
+
+	return current.value
 }
