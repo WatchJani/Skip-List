@@ -38,3 +38,19 @@ func BenchmarkSearch(b *testing.B) {
 		sl.Search(152)
 	}
 }
+
+// 4 130 000ns
+func BenchmarkLoopMemTable(b *testing.B) {
+	b.StopTimer()
+
+	sl := New(32, b.N*2, 0.25)
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		for range 40_000 {
+			sl.Insert(i, i)
+		}
+		sl.Clear()
+	}
+}

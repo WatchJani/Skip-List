@@ -15,10 +15,11 @@ func main() {
 	// s := []int{136, 137, 119, 42, 134, 41, 145, 110, 44, 4}
 
 	for index := range 12315 {
-		go sl.Insert(index, index)
+		sl.Insert(index, index)
 	}
 
-	fmt.Println(sl.Search(152))
+	sl.Clear()
+	fmt.Println(sl.Search(123))
 
 	// sl.Read()
 }
