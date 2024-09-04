@@ -2,6 +2,9 @@ package main
 
 import "testing"
 
+//170ns multithread ryzen 5 3500x
+//136ns multithread ryzen 5 5600x
+
 // 156ns //single thread
 func BenchmarkInsert(b *testing.B) {
 	b.StopTimer()
@@ -18,6 +21,8 @@ func BenchmarkInsert(b *testing.B) {
 //180ns for multi core
 
 // 30ns search
+//20ns ryzen 5 5600x
+
 func BenchmarkSearch(b *testing.B) {
 	b.StopTimer()
 

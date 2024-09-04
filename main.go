@@ -160,3 +160,11 @@ func (s *SkipList) Read() {
 		fmt.Println(startNode)
 	}
 }
+
+func (s *SkipList) Clear() {
+	for index := range s.roots {
+		s.roots[index].next = nil
+	}
+
+	s.Pool.Clear()
+}
