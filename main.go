@@ -18,8 +18,8 @@ func main() {
 		sl.Insert(index, index)
 	}
 
+	fmt.Println(sl.Search(12315))
 	sl.Clear()
-	fmt.Println(sl.Search(123))
 
 	// sl.Read()
 }
@@ -135,7 +135,7 @@ func flipCoin(percentage float64) bool {
 	return rand.Float64() < percentage
 }
 
-func (s *SkipList) Search(key int) int {
+func (s *SkipList) Search(key int) (bool, int) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -153,7 +153,7 @@ func (s *SkipList) Search(key int) int {
 		current = current.down
 	}
 
-	return current.value
+	return current.key == key, current.value
 }
 
 func (s *SkipList) Read() {
